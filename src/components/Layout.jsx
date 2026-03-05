@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getRoute } from "../lib/router.js";
+import PostDetail from "../pages/PostDetail.jsx";
 import LeftNav from "./LeftNav.jsx";
 import Composer from "./Composer.jsx";
 import Feed from "./Feed.jsx";
@@ -9,6 +11,13 @@ import { supabase } from "../lib/supabaseClient.js";
 export default function Layout() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [route, setRoute] = useState(getRoute());
+
+  useEffect(() => {
+    const onHash = () => setRoute(getRoute());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   async function load() {
     setLoading(true);
