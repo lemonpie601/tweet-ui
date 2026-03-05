@@ -84,7 +84,7 @@ export default function PostDetail({ postId }) {
             </div>
           </div>
 
-          <CommentForm onCreate={addComment} />
+          <CommentForm onCreate={addComment} contextText={post.body} />
           <CommentList comments={comments} onDelete={deleteComment} />
         </>
       )}
