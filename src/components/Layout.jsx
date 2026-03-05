@@ -1,34 +1,64 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import LeftNav from "./LeftNav.jsx";
 import Composer from "./Composer.jsx";
 import Feed from "./Feed.jsx";
 import RightPanel from "./RightPanel.jsx";
-import { MOCK_POSTS } from "../data/mock.js";
-import { loadPosts, makePost, savePosts } from "../lib/storage.js";
+import AuthGate from "./AuthGate.jsx";
+import { supabase } from "../lib/supabaseClient.js";
 
 export default function Layout() {
-  const initial = useMemo(() => loadPosts(MOCK_POSTS), []);
-  const [posts, setPosts] = useState(initial);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  function createPost(body) {
-    const newPost = makePost({ body });
-    const next = [newPost, ...posts];
-    setPosts(next);
-    savePosts(next);
+  async function load() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error(error);
+      alert(error.message);
+    } else {
+      setPosts(data ?? []);
+    }
+    setLoading(false);
   }
 
-  function likePost(id) {
-    const next = posts.map((p) =>
-      p.id === id ? { ...p, stats: { ...p.stats, likes: p.stats.likes + 1 } } : p
-    );
-    setPosts(next);
-    savePosts(next);
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function createPost(body) {
+    const { data: sess } = await supabase.auth.getSession();
+    const user = sess.session?.user;
+
+    const { error } = await supabase.from("posts").insert({
+      body,
+      author_id: user?.id ?? null,
+      author_name: user?.email?.split("@")[0] ?? "anon"
+    });
+
+    if (error) return alert(error.message);
+    await load();
   }
 
-  function removePost(id) {
-    const next = posts.filter((p) => p.id !== id);
-    setPosts(next);
-    savePosts(next);
+  async function likePost(id, currentLikes) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ likes: currentLikes + 1 })
+      .eq("id", id);
+
+    if (error) return alert(error.message);
+    setPosts((prev) => prev.map((p) => (p.id === id ? { ...p, likes: p.likes + 1 } : p)));
+  }
+
+  async function deletePost(id) {
+    const { error } = await supabase.from("posts").delete().eq("id", id);
+    if (error) return alert(error.message);
+    setPosts((prev) => prev.filter((p) => p.id !== id));
   }
 
   return (
@@ -42,10 +72,17 @@ export default function Layout() {
       <main className="card">
         <div className="centerHeader">
           <div className="title">Home</div>
-          <div className="chip">LocalStorage · no AI yet</div>
+          <div className="chip">Supabase · shared</div>
         </div>
-        <Composer onCreate={createPost} />
-        <Feed posts={posts} onLike={likePost} onDelete={removePost} />
+
+        <AuthGate>
+          <Composer onCreate={createPost} />
+          {loading ? (
+            <div style={{ padding: 14, color: "var(--muted)" }}>Loading feed…</div>
+          ) : (
+            <Feed posts={posts} onLike={likePost} onDelete={deletePost} />
+          )}
+        </AuthGate>
       </main>
 
       <aside className="right">
