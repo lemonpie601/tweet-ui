@@ -1,8 +1,4 @@
-import { useState } from "react";
-
-export default function Post({ post }) {
-  const [likes, setLikes] = useState(post.stats.likes);
-
+export default function Post({ post, onLike, onDelete }) {
   return (
     <div className="feedItem">
       <div className="feedRow">
@@ -22,15 +18,11 @@ export default function Post({ post }) {
             <button className="actionBtn" aria-label="repost">
               🔁 {post.stats.reposts}
             </button>
-            <button
-              className="actionBtn"
-              aria-label="like"
-              onClick={() => setLikes((v) => v + 1)}
-            >
-              ❤️ {likes}
+            <button className="actionBtn" aria-label="like" onClick={onLike}>
+              ❤️ {post.stats.likes}
             </button>
-            <button className="actionBtn" aria-label="share">
-              ⤴️ Share
+            <button className="actionBtn" aria-label="delete" onClick={onDelete} title="내 글 삭제">
+              🗑️
             </button>
           </div>
         </div>
