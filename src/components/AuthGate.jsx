@@ -3,8 +3,8 @@ import { supabase } from "../lib/supabaseClient.js";
 
 // username을 "가짜 이메일"로 변환해서 아이디+비번처럼 보이게
 function toEmail(username) {
-  const u = username.trim().toLowerCase();
-  return `${u}@yourmoltbook.local`;
+  const u = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+  return `${u}@example.com`;
 }
 
 export default function AuthGate({ children }) {
