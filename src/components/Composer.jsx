@@ -1,10 +1,16 @@
 import { useMemo, useState } from "react";
 
-export default function Composer() {
+export default function Composer({ onCreate }) {
   const [text, setText] = useState("");
 
   const remaining = useMemo(() => 280 - text.length, [text.length]);
   const disabled = text.trim().length === 0 || remaining < 0;
+
+  function submit() {
+    if (disabled) return;
+    onCreate?.(text.trim());
+    setText("");
+  }
 
   return (
     <div className="composer">
@@ -22,7 +28,7 @@ export default function Composer() {
             <div className="hint">
               {remaining >= 0 ? `${remaining}자 남음` : `초과: ${-remaining}자`}
             </div>
-            <button className="postBtn" disabled={disabled} title="지금은 UI만!">
+            <button className="postBtn" disabled={disabled} onClick={submit}>
               Post
             </button>
           </div>
