@@ -85,11 +85,17 @@ export default function Layout() {
         </div>
 
         <AuthGate>
-          <Composer onCreate={createPost} />
-          {loading ? (
-            <div style={{ padding: 14, color: "var(--muted)" }}>Loading feed…</div>
+          {route.name === "home" ? (
+            <>
+              <Composer onCreate={createPost} />
+              {loading ? (
+                <div style={{ padding: 14, color: "var(--muted)" }}>Loading feed…</div>
+              ) : (
+                <Feed posts={posts} onLike={likePost} onDelete={deletePost} />
+              )}
+            </>
           ) : (
-            <Feed posts={posts} onLike={likePost} onDelete={deletePost} />
+            <PostDetail postId={route.id} />
           )}
         </AuthGate>
       </main>
