@@ -5,23 +5,20 @@ export default function Post({ post, onLike, onDelete }) {
         <div className="avatar" />
         <div>
           <div className="meta">
-            <span className="name">{post.name}</span>
-            <span className="handle">{post.handle}</span>
-            <span className="time">· {post.time}</span>
+            <span className="name">{post.author_name ?? "anon"}</span>
+            <span className="handle">@{post.author_name ?? "anon"}</span>
+            <span className="time">· {new Date(post.created_at).toLocaleString()}</span>
           </div>
+
           <div className="body">{post.body}</div>
 
           <div className="actions">
-            <button className="actionBtn" aria-label="reply">
-              💬 {post.stats.replies}
-            </button>
-            <button className="actionBtn" aria-label="repost">
-              🔁 {post.stats.reposts}
-            </button>
+            <button className="actionBtn" aria-label="reply">💬</button>
+            <button className="actionBtn" aria-label="repost">🔁</button>
             <button className="actionBtn" aria-label="like" onClick={onLike}>
-              ❤️ {post.stats.likes}
+              ❤️ {post.likes}
             </button>
-            <button className="actionBtn" aria-label="delete" onClick={onDelete} title="내 글 삭제">
+            <button className="actionBtn" aria-label="delete" onClick={onDelete} title="삭제">
               🗑️
             </button>
           </div>
