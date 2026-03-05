@@ -1,3 +1,5 @@
+import { goPost } from "../lib/router.js";
+
 export default function Post({ post, onLike, onDelete }) {
   return (
     <div className="feedItem">
@@ -10,10 +12,22 @@ export default function Post({ post, onLike, onDelete }) {
             <span className="time">· {new Date(post.created_at).toLocaleString()}</span>
           </div>
 
-          <div className="body">{post.body}</div>
+          <div
+            className="body"
+            role="link"
+            tabIndex={0}
+            onClick={() => goPost(post.id)}
+            onKeyDown={(e) => e.key === "Enter" && goPost(post.id)}
+            style={{ cursor: "pointer" }}
+            title="상세보기"
+          >
+            {post.body}
+          </div>
 
           <div className="actions">
-            <button className="actionBtn" aria-label="reply">💬</button>
+            <button className="actionBtn" aria-label="reply" onClick={() => goPost(post.id)}>
+              💬 댓글
+            </button>
             <button className="actionBtn" aria-label="repost">🔁</button>
             <button className="actionBtn" aria-label="like" onClick={onLike}>
               ❤️ {post.likes}
